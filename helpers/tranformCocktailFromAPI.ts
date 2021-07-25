@@ -16,7 +16,7 @@ export default function transformCockatailFromAPI(cocktail: any): Drink {
     thumbUrl: cocktail.strDrinkThumb,
     name: cocktail.strDrink,
     ingredients: ingredientWithQuantity,
-    tags: cocktail.strTags,
+    tags: cocktail.strTags?.split(',') || [],
     instructions: cocktail.strInstructions
       .split('.')
       .map((step: string) => step.trim())

@@ -1,10 +1,11 @@
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import axios from 'axios';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useEffect } from 'react';
 
 import { useState } from 'react';
+import { TouchableOpacity } from 'react-native';
 import {
   StyleSheet,
   SafeAreaView,
@@ -14,8 +15,10 @@ import {
   Platform,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import transformCockatailFromAPI from './helpers/tranformCocktailFromAPI';
-import { Drink, IngredientWithQuantity, RootStackParamList } from './types';
+import { FavoritesContext, FavoritesContextValue } from '../contexts/favorites';
+import transformCockatailFromAPI from '../helpers/tranformCocktailFromAPI';
+import { Drink, IngredientWithQuantity, RootStackParamList } from '../types';
+import { AntDesign } from '@expo/vector-icons';
 
 const styles = StyleSheet.create({
   container: {
@@ -103,6 +106,9 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  favorite: {
+    margin: 50,
+  },
 });
 
 type CocktailDetailsRouteProp = RouteProp<
@@ -126,6 +132,22 @@ const Ingredient = ({ quantity, name }: IngredientWithQuantity) => {
   );
 };
 
+const Tag = ({ name }: { name: string }) => {
+  return (
+    <View
+      style={{
+        backgroundColor: 'orange',
+        margin: 20,
+        padding: 12,
+        borderRadius: 25,
+        elevation: 2,
+      }}
+    >
+      <Text style={{ fontSize: 25 }}>{name}</Text>
+    </View>
+  );
+};
+
 export default function CocktailsDetails({
   route,
   navigation,
@@ -133,6 +155,9 @@ export default function CocktailsDetails({
   route: CocktailDetailsRouteProp;
   navigation: StackNavigationProp<RootStackParamList>;
 }) {
+  const { isFavorite, toggleFavorite } = useContext<FavoritesContextValue>(
+    FavoritesContext as any
+  );
   const { cocktailId } = route.params;
   const [cocktail, setCocktail] = useState<Drink | null>(null);
 
@@ -152,7 +177,7 @@ export default function CocktailsDetails({
           const cocktail = transformCockatailFromAPI(data.drinks[0]);
           setCocktail(cocktail);
           navigation.setOptions({
-            title: `Cocktail details : ${cocktail.name}`,
+            title: `${cocktail.name}`,
           });
         })
         .catch(console.error);
@@ -168,7 +193,8 @@ export default function CocktailsDetails({
       </View>
     );
 
-  const { name, thumbUrl, ingredients, instructions } = cocktail;
+  const { id, thumbUrl, ingredients, instructions, tags } = cocktail;
+  console.log(tags);
 
   return (
     <SafeAreaView>
@@ -176,13 +202,28 @@ export default function CocktailsDetails({
         <View style={styles.imageContainer}>
           <Image source={{ uri: thumbUrl }} style={styles.cocktailImage} />
         </View>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            marginTop: tags?.length ? 50 : 0,
+            justifyContent: 'space-around',
+          }}
+        >
+          {tags?.map((t) => (
+            <Tag key={t} name={t} />
+          ))}
+        </View>
         <View style={styles.ingredientsContainer}>
           {ingredients &&
-            ingredients.map((i) => <Ingredient key={i.name} {...i} />)}
+            ingredients
+              .filter((i) => !!i.name)
+              .map((i) => <Ingredient key={i.name} {...i} />)}
         </View>
         {instructions &&
           instructions.map((i, idx) => (
-            <View style={styles.step}>
+            <View key={idx} style={styles.step}>
               <View style={styles.stepNumber}>
                 <Text style={styles.stepNumberText}>{idx + 1}</Text>
               </View>
@@ -191,6 +232,16 @@ export default function CocktailsDetails({
               </View>
             </View>
           ))}
+
+        <View style={styles.favorite}>
+          <TouchableOpacity onPress={() => toggleFavorite(cocktail)}>
+            <AntDesign
+              name={isFavorite(id) ? 'heart' : 'hearto'}
+              size={100}
+              color={isFavorite(id) ? 'red' : 'gray'}
+            />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
