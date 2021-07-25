@@ -4,7 +4,7 @@ import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import CocktailsDetails from './screens/CocktailDetails';
-import CocktailList from './components/CocktailList';
+import SearchCocktails from './screens/SearchCocktails';
 import FavoritesContextProvider from './contexts/favorites';
 
 const Stack = createStackNavigator();
@@ -12,7 +12,7 @@ const Stack = createStackNavigator();
 function App() {
   return (
     <>
-      <StatusBar />
+      <StatusBar barStyle='dark-content' />
       <NavigationContainer>
         <FavoritesContextProvider>
           <Stack.Navigator
@@ -20,7 +20,7 @@ function App() {
               headerShown: false,
             }}
           >
-            <Stack.Screen name='Cocktails' component={CocktailList} />
+            <Stack.Screen name='Cocktails' component={SearchCocktails} />
             <Stack.Screen
               name='Cocktail details'
               options={{ headerShown: true }}

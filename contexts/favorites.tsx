@@ -1,20 +1,22 @@
 import React, { createContext, useState } from 'react';
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import { Drink } from '../types';
-
-export const FavoritesContext = createContext({});
 
 interface FavoritesObject {
   [key: string]: boolean | undefined;
 }
-
 export interface FavoritesContextValue {
   isFavorite: (id: string) => boolean;
   toggleFavorite: (drink: Drink) => void;
   savedFavorites: Drink[];
 }
+
+export const FavoritesContext = createContext<FavoritesContextValue>({
+  isFavorite: () => false,
+  toggleFavorite: () => {},
+  savedFavorites: [],
+});
 
 export default function FavoritesContextProvider({
   children,
